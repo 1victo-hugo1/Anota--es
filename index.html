@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Notas</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #1a1a2e;
+    min-height: 100vh;
+    padding: 24px;
+    color: #fff;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.4rem;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.5;
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+  }
+
+  /* toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  #new-btn {
+    padding: 10px 22px;
+    background: #7a8fa6;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 14px rgba(122,143,166,0.35);
+  }
+  #new-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(122,143,166,0.45); }
+  #new-btn:active { transform: scale(0.97); }
+
+  .color-picker {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-dot:hover { transform: scale(1.2); }
+  .color-dot.selected { border-color: white; transform: scale(1.15); }
+
+  #save-status {
+    margin-left: auto;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    letter-spacing: 0.06em;
+  }
+  #save-status.saved { opacity: 1; color: #8bbb9e; }
+
+  /* grid */
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  /* note card */
+  .note-card {
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    animation: popIn 0.25s ease;
+  }
+  .note-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(0,0,0,0.3); }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.92) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .note-title {
+    font-size: 1rem;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+  }
+  .note-title::placeholder { opacity: 0.45; }
+
+  .note-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.12);
+  }
+
+  .note-body {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    font-size: 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    line-height: 1.7;
+    resize: none;
+    min-height: 100px;
+  }
+  .note-body::placeholder { opacity: 0.4; }
+
+  .note-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    opacity: 0.55;
+  }
+
+  .delete-btn {
+    background: rgba(0,0,0,0.12);
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: inherit;
+    transition: background 0.15s;
+  }
+  .delete-btn:hover { background: rgba(0,0,0,0.28); }
+
+  /* color palettes per card */
+  .bg-rose    { background: #d4a5a5; color: #3a2020; }
+  .bg-orange  { background: #d4b896; color: #3a2810; }
+  .bg-yellow  { background: #d4cc96; color: #3a3510; }
+  .bg-mint    { background: #9dbfaa; color: #142b1e; }
+  .bg-sky     { background: #96b4d4; color: #0f2236; }
+  .bg-violet  { background: #b0a5c8; color: #221830; }
+  .bg-pink    { background: #c8a5b8; color: #301525; }
+  .bg-sand    { background: #d4c9b0; color: #352e1a; }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    opacity: 0.3;
+  }
+  .empty-state span { font-size: 3rem; display: block; margin-bottom: 12px; }
+  .empty-state p { font-size: 1rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✏️ Notas</h1>
+  <p>suas anotações • salvamento automático</p>
+</header>
+
+<div class="toolbar">
+  <button id="new-btn" onclick="newNote()">+ Nova nota</button>
+  <div class="color-picker" id="color-picker"></div>
+  <span id="save-status">—</span>
+</div>
+
+<div id="grid"></div>
+
+<script>
+const COLORS = [
+  { cls: 'bg-rose',   hex: '#d4a5a5' },
+  { cls: 'bg-orange', hex: '#d4b896' },
+  { cls: 'bg-yellow', hex: '#d4cc96' },
+  { cls: 'bg-mint',   hex: '#9dbfaa' },
+  { cls: 'bg-sky',    hex: '#96b4d4' },
+  { cls: 'bg-violet', hex: '#b0a5c8' },
+  { cls: 'bg-pink',   hex: '#c8a5b8' },
+  { cls: 'bg-sand',   hex: '#d4c9b0' },
+];
+
+let selectedColor = COLORS[0].cls;
+let notes = [];
+let saveTimer = null;
+
+/* ---- storage ---- */
+function load() {
+  try { notes = JSON.parse(localStorage.getItem('notas_app') || '[]'); } catch(e) { notes = []; }
+  renderAll();
+}
+
+function save() {
+  localStorage.setItem('notas_app', JSON.stringify(notes));
+  const el = document.getElementById('save-status');
+  el.textContent = 'salvo ✓';
+  el.classList.add('saved');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { el.textContent = '—'; el.classList.remove('saved'); }, 2000);
+}
+
+function autoSave() {
+  document.getElementById('save-status').textContent = 'salvando...';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 900);
+}
+
+/* ---- notes ---- */
+function genId() { return Date.now().toString(36); }
+
+function newNote() {
+  const note = { id: genId(), title: '', body: '', color: selectedColor, date: new Date().toLocaleDateString('pt-BR') };
+  notes.unshift(note);
+  save();
+  renderAll();
+  setTimeout(() => document.querySelector('.note-title').focus(), 50);
+}
+
+function deleteNote(id) {
+  notes = notes.filter(n => n.id !== id);
+  save();
+  renderAll();
+}
+
+function updateNote(id, field, value) {
+  const n = notes.find(n => n.id === id);
+  if (n) { n[field] = value; autoSave(); }
+}
+
+/* ---- render ---- */
+function renderAll() {
+  const grid = document.getElementById('grid');
+  if (notes.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><span>📝</span><p>nenhuma nota ainda — clique em "+ Nova nota"</p></div>`;
+    return;
+  }
+  grid.innerHTML = notes.map(note => `
+    <div class="note-card ${note.color}">
+      <input
+        class="note-title"
+        placeholder="Título..."
+        value="${escHtml(note.title)}"
+        oninput="updateNote('${note.id}', 'title', this.value)"
+      />
+      <div class="note-divider"></div>
+      <textarea
+        class="note-body"
+        placeholder="Escreva sua nota aqui..."
+        oninput="updateNote('${note.id}', 'body', this.value)"
+      >${escHtml(note.body)}</textarea>
+      <div class="note-footer">
+        <span>${note.date}</span>
+        <button class="delete-btn" onclick="deleteNote('${note.id}')" title="excluir">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ---- color picker ---- */
+function buildColorPicker() {
+  const el = document.getElementById('color-picker');
+  el.innerHTML = COLORS.map(c => `
+    <div
+      class="color-dot${c.cls === selectedColor ? ' selected' : ''}"
+      style="background:${c.hex}"
+      title="${c.cls.replace('bg-','')}"
+      onclick="selectColor('${c.cls}', this)"
+    ></div>
+  `).join('');
+}
+
+function selectColor(cls, el) {
+  selectedColor = cls;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+buildColorPicker();
+load();
+</script>
+</body>
+</html>
